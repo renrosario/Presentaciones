@@ -1,0 +1,40 @@
+\titlegraphic{\href{https://renrosario.rbind.io}{\includegraphics[height=2cm]{Logo.png}}\hspace*{3cm}\href{https://www.r-consortium.org}{\includegraphics[height=2cm]{consorcio.png}}}
+
+\usepackage{framed}
+\setlength{\OuterFrameSep}{-1pt}
+\makeatletter
+\preto{\@verbatim}{\topsep=-1pt \partopsep=-10pt }
+\makeatother
+
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+
+  \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+
+  \begin{beamercolorbox}[wd=.65\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{3em}
+  \end{beamercolorbox}%
+
+  \begin{beamercolorbox}[wd=.1\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \insertframenumber{} / \inserttotalframenumber\hspace*{1ex}
+  \end{beamercolorbox}}%
+
+%  \begin{beamercolorbox}[wd=.75\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+%    \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{3em}
+%    \insertframenumber{} / \inserttotalframenumber\hspace*{1ex}
+%  \end{beamercolorbox}}%
+
+  \vskip0pt%
+}
+
+\makeatletter
+\setbeamertemplate{navigation symbols}{}
+
+%% change fontsize of output
+\let\oldverbatim\verbatim
+\let\endoldverbatim\endverbatim
+\renewenvironment{verbatim}{\footnotesize\oldverbatim}{\endoldverbatim}
