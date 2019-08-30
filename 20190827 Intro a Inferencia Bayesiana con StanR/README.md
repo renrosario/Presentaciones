@@ -1,4 +1,4 @@
-# Introducción a la Inferencia Bayesiana con StanR
+# Introducción a la Inferencia Bayesiana con RStan
 
 Charla a cargo del Ing. Nacho Evangelista.
 Fehca: 27/8/19
