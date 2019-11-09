@@ -1,0 +1,15 @@
+Se tiene un archivo de Excel donde cada registro corresponde a una ficha vendida en un determinado mes.
+El objetivo es enviar a cada gerente un archivo de Excel con las fichas vendidas por las personas a su cargo,
+teniendo en cuenta el segmento.
+Se trabaja de forma ordenada, organizando/creando carpetas para poder automatizar la tarea.
+
+Variables:
+Ficha ID: número de ficha.
+Promotor ID: promotor que se encargó de la venta.
+Nro Supervisor: supervisor del promotor.
+Gerente Zonal: gerente de la zona en la que trabaja el promotor.
+Segmento DESC: segmento de la venta.
+Producto Plan ID: segmento codificado.
+Periodo Produccion ID: mes de la venta.
+Plan Agrupado DESC: grupo al que pertenece el plan vendido.
+Capitas: cantidad de capitas vendidas.
