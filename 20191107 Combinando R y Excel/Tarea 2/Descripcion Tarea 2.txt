@@ -1,0 +1,13 @@
+-Cada integrante de un equipo registra los casos tratados en un mes en una planilla de Excel (estas 
+planillas son individuales, es decir, cada integrante tiene su planilla). A fin de mes, entregan 
+estas planillas para ser analizadas. Estas planillas contienen casos finalizados y casos pendientes 
+(un caso pendiente es aquel que está iniciado pero aún no está finalizado).
+-Se leen y combinan las planillas individuales en una única planilla.
+-Se crea una planilla por integrante que será la nueva planilla con la que trabajará 
+el mes siguiente, la cual contiene los casos pendientes de finalización.
+
+OBS: Las planillas que se les entregan tienen columnas donde se deben elegir opciones
+(validación de datos). A su vez, en el archivo de salida se controla el ancho de las columnas.
+
+
+
