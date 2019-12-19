@@ -1,0 +1,9 @@
+Clase	Sexo	Prop
+1ra Clase	Hombre	0.344444444444444
+1ra Clase	Mujer	0.972413793103448
+2da Clase	Hombre	0.139664804469274
+2da Clase	Mujer	0.877358490566038
+3ra Clase	Hombre	0.172549019607843
+3ra Clase	Mujer	0.459183673469388
+Tripulación	Hombre	0.222737819025522
+Tripulación	Mujer	0.869565217391304
