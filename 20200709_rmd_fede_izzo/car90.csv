@@ -1,0 +1,50 @@
+Modelo,Pais de Origen,Desplazamiento del Motor (lts),Velocidad del Motor a 60 mph,Radio de Giro,Caballos de Fuerza,Max rpm de Seguridad,Altura (pulgadas),Largo (pulgadas),Espacio Equipaje,Modelo Alternativo,Precio (U$S),Direccion,Capacidad Tanque (galones),Cubiertas,Caja Manual,Caja Automática,Categoria,Peso,Latitud,Longitud,Rendimiento (millas/galon)
+Porsche 944,Alemania,2.7,2380,3.45,165,5900,46,169,12,,41990,power,21.1,195/65,man.5,auto.3,Deportivo,2900,-33.087425,-60.633049,23
+Audi 100,Alemania,2.3,2775,3.25,130,5500,51.5,193,17,,26900,power,21.1,205/60,man.5,auto.3,Mediano,2935,-33.087425,-60.633049,20
+Volkswagen Fox,Brasil,1.8,2765,NA,81,5500,49.5,163,10,,7225,manual,12.4,175/70,man.4,,Baja,2190,-33.087425,-60.633049,19
+Peugeot 505,Francia,2.2,NA,3.38,120,5000,52,181,11,,19945,power,18,185/65,,auto.4,Mediano,3000,-33.087425,-60.633049,19
+Ford Festiva,Corea,1.3,2545,3.23,63,5000,52,141,12,,6319,both,10,145,man.5,auto.3,Baja,1845,-33.087425,-60.633049,37
+Toyota Tercel,Japon,1.5,2765,3.72,78,6000,49.5,167,13,,6488,both,11.9,155,man.5,auto.3,Baja,2075,-33.087425,-60.633049,35
+Subaru Justy,Japon,1.2,2945,2.99,73,5600,50.5,146,9,,5866,manual,9.2,165/65,man.5,auto.CVT,Baja,1900,-33.087425,-60.633049,34
+Honda Civic CRX,Japon,1.6,3010,NA,108,6000,45,149,2,,9410,manual,11.9,185/60,man.5,,Deportivo,2170,-33.087425,-60.633049,33
+Eagle Summit,USA,1.6,3125,2.78,113,6500,49.5,170,10,,8895,both,13.2,195/60,man.5,auto.4,Baja,2560,-33.087425,-60.633049,33
+Ford Escort,USA,1.9,2320,3.26,90,4600,51.5,169,18,,7402,both,13,175/70,man.5,auto.3,Baja,2345,-33.087425,-60.633049,33
+Mazda Protege,Japon,1.8,2735,2.43,103,5500,49,172,13,,6599,both,14.5,175/70,man.5,auto.4,Baja,2440,-33.087425,-60.633049,32
+Ford Probe,USA,2.2,2530,2.59,110,4700,47,177,12,,11470,power,15.1,185/70,man.5,auto.4,Deportivo,2695,-33.087425,-60.633049,30
+Toyota Corolla,Japon,1.6,2765,3.53,102,5800,49.5,170,11,,8748,both,13.2,155/65,man.5,auto.3,Baja,2390,-33.087425,-60.633049,29
+Pontiac LeMans,Corea,1.6,2295,3.43,74,5600,50,172,18,,7254,both,13.2,175/70,man.5,auto.3,Baja,2350,-33.087425,-60.633049,28
+Subaru XT,Japon,1.8,2935,2.69,97,5200,46,178,10,,13071,power,15.9,185/70,man.5,auto.4,Deportivo,2485,-33.087425,-60.633049,28
+Audi 80,Alemania,2,2835,3.25,108,5300,50.5,176,10,,18900,power,15.9,175/70,man.5,auto.3,Compacto,2670,-33.087425,-60.633049,27
+Honda Prelude,Japon,2,3115,3.23,140,6200,47,178,11,,13945,power,15.9,195/60,man.5,auto.4,Deportivo,2710,-33.087425,-60.633049,27
+Dodge Daytona,USA,2.2,2130,3.02,150,4800,47,179,17,,9745,power,14,205/60,man.5,auto.3,Deportivo,2935,-33.087425,-60.633049,27
+Volkswagen Jetta,Alemania,1.8,2510,3.41,100,5400,51,172,17,,9995,both,14.5,175/70,man.5,auto.3,Baja,2330,-33.087425,-60.633049,26
+Plymouth Laser,USA,1.8,2810,3.27,92,5000,47,171,10,Mitsubishi Eclipse,10855,both,15.9,185/70,man.5,auto.4,Deportivo,2840,-33.087425,-60.633049,26
+Chevrolet Beretta,USA,2.2,2375,3.18,95,5200,49,187,14,Chevrolet Corsica 4,10320,power,15.6,195/70,man.5,auto.3,Compacto,2655,-33.087425,-60.633049,26
+Mitsubishi Galant,Japon,2,2615,2.74,102,5000,50.5,184,11,,10989,power,15.9,185/70,man.5,auto.4,Compacto,2745,-33.087425,-60.633049,25
+Subaru Loyale,Japon,1.8,2770,3.6,90,5200,49,175,15,,9599,power,15.9,175/70,man.5,auto.3,Baja,2295,-33.087425,-60.633049,25
+Chrysler Le Baron,USA,2.5,NA,3.02,150,4800,51,183,14,      Turbo 4 (3),10945,power,14,195/70,,auto.3,Compacto,2975,-33.087425,-60.633049,25
+Peugeot 405,Francia,2,2760,3.12,120,5200,51,175,14,,15930,power,17.2,185/65,man.5,auto.4,Compacto,2575,-33.087425,-60.633049,24
+Nissan 240SX,Japon,2.5,2670,2.83,140,5600,46.5,178,14,,13249,power,15.9,195/60,man.5,auto.4,Deportivo,2775,-33.087425,-60.633049,24
+Ford Tempo,USA,2.3,2195,3.26,98,4400,49.5,177,13,Mercury Topaz 4,9483,power,15.4,185/70,man.5,auto.3,Compacto,2750,-33.087425,-60.633049,24
+Hyundai Sonata,Corea,2.4,2305,2.74,110,4500,50.5,184,14,,9999,power,15.9,185/70,man.5,auto.4,Mediano,2885,-33.087425,-60.633049,23
+Toyota Cressida,Japon,3,NA,2.76,190,5600,50.5,190,12,,21498,power,18.5,195/65,,auto.4,Mediano,3480,-33.087425,-60.633049,23
+Buick Le Sabre,USA,3.8,NA,1.99,165,4800,51,197,16,Oldsmobile 88 Royale V6,16145,power,18,205/75,,auto.4,Familiar,3325,-33.087425,-60.633049,23
+Ford Thunderbird,USA,3.8,NA,2.19,140,3800,49,199,15,Mercury Cougar V6,14980,power,19,205/70,,auto.4,Mediano,3610,-33.087425,-60.633049,23
+Pontiac Grand Am,USA,2.3,2245,3.18,160,6200,48.5,180,13,,10565,power,13.6,195/70,man.5,auto.3,Compacto,2770,-33.087425,-60.633049,23
+Nissan Maxima,Japon,3,2350,2.53,160,5200,49.5,188,14,,17899,power,18.5,205/65,man.5,auto.4,Mediano,3200,-33.087425,-60.633049,22
+Eagle Premier,USA,3,NA,2.66,150,5000,51,193,17,Dodge Monaco V6,15350,power,17,205/60,,auto.4,Mediano,3145,-33.087425,-60.633049,22
+Chrysler Le Baron Coupe,USA,2.5,NA,3.02,150,4800,49,185,14,      Turbo 4 (3),12495,power,14,195/70,,auto.3,Mediano,2975,-33.087425,-60.633049,22
+Mazda 929,Japon,3,NA,2.81,158,5500,51,194,15,,23300,power,18.5,195/65,,auto.4,Mediano,3480,-33.087425,-60.633049,21
+Mitsubishi Sigma,Japon,3,NA,2.54,142,5000,49.5,186,12,,17879,power,15.9,195/65,,auto.4,Compacto,3110,-33.087425,-60.633049,21
+Nissan Stanza,Japon,2.4,2395,2.53,138,5600,49.5,180,14,,11650,power,16.4,195/65,man.5,auto.4,Compacto,2920,-33.087425,-60.633049,21
+Buick Century,USA,2.5,NA,2.84,110,5200,49.5,189,16,,13150,power,15.7,185/75,,auto.3,Mediano,2880,-33.087425,-60.633049,21
+Acura Legend,Japon,2.7,2505,3.02,160,5900,50,191,14,,24760,power,18,205/60,man.5,auto.4,Mediano,3265,-33.087425,-60.633049,20
+Mitsubishi Wagon,Japon,2.4,NA,2.9,107,5000,65.5,175,4,,14929,both,14.2,205/75,,auto.4,Van,3415,-33.087425,-60.633049,20
+Nissan Axxess,Japon,2.4,NA,2.7,138,5600,58,172,3,,13949,power,17.2,195/70,,auto.4,Van,3185,-33.087425,-60.633049,20
+Ford LTD Crown Victoria,USA,5,NA,1.83,150,3200,52,211,22,Mercury Grand Marquis V8,17257,power,18,215/70,,auto.4,Familiar,3850,-33.087425,-60.633049,20
+Mazda MPV,Japon,3,2510,2.71,150,5000,61.5,176,2,,14944,power,19.6,205/70,man.5,auto.4,Van,3735,-33.087425,-60.633049,19
+Nissan Van,Japon,2.4,NA,3.17,106,4800,65.5,178,2,,14799,power,17.7,195/75,,auto.4,Van,3690,-33.087425,-60.633049,19
+Dodge Grand Caravan,USA,3.3,NA,2.36,150,4800,61,191,2,Voyager V6/Chrysler Town & Country V6,15395,power,20,205/70,,auto.4,Van,3735,-33.087425,-60.633049,18
+Chevrolet Caprice,USA,5,NA,1.83,170,4400,52.5,212,20,,14525,power,25,205/75,,auto.4,Familiar,3855,-33.087425,-60.633049,18
+Chevrolet Lumina APV,USA,3.1,NA,3.18,120,4200,60,194,2,Silhouette V6/ Pontiac Trans Sport V6,13995,power,20,205/70,,auto.3,Van,3630,-33.087425,-60.633049,18
+Ford Aerostar,USA,3,2075,2.45,145,4800,66.5,175,2,,12267,power,21,215/70,man.5,auto.4,Van,3665,-33.087425,-60.633049,18

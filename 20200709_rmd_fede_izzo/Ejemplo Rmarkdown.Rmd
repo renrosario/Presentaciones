@@ -1,0 +1,204 @@
+---
+title: "Ejemplo de Uso R Markdown - Base cars90"
+author: "Base Cars"
+date: "Apr 29, 2019"
+params: 
+  num: !r num
+output: 
+ html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    theme: united
+    highlight: textmate
+
+    
+---
+
+<style type="text/css">
+
+h1.title {
+  font-size: 38px;
+  text-align: center;
+}
+
+</style>
+  
+<br />  
+  
+***
+<br />  
+  
+```{r,include=FALSE}
+
+## Librerias, base de datos y wrangling ###
+
+library(tinytex)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(png)
+library(grid)
+library(leaflet)
+library(osmdata)
+library(htmlwidgets)
+library(webshot)
+library(kableExtra)
+
+DB <- read.csv("car90.csv")
+
+DB_Subset <- DB %>% filter(Modelo == num)
+
+Modelo_Subset <- as.character(DB_Subset$Modelo)
+Pais.de.Origen <- as.character(DB_Subset$Pais.de.Origen)
+Potencia <- as.character(DB_Subset$Caballos.de.Fuerza)
+Rendimiento <- as.character(DB_Subset$Rendimiento..millas.galon.)
+Radio_de_Giro <- as.character(DB_Subset$Radio.de.Giro)
+Peso <- as.character(DB_Subset$Peso)
+Precio <- as.character(DB_Subset$Precio..U.S.)
+Cat <- as.character(DB_Subset$Categoria)
+
+Subset_Categoria <- DB %>% filter(Categoria == Cat)
+
+Tabla_Dimensiones <- data.frame("Modelo" = Subset_Categoria$Modelo,
+                                "Altura en pulgadas" = Subset_Categoria$Altura..pulgadas.,
+                                "Largo en pulgadas" = Subset_Categoria$Largo..pulgadas.,
+                                "Espacio Equipaje" = Subset_Categoria$Espacio.Equipaje,
+                                "Cubiertas" = Subset_Categoria$Cubiertas)
+Row <- which(Tabla_Dimensiones$Modelo == Modelo_Subset)
+
+## Graficos + imagenes + mapas (c o web) ####
+
+R_sq <- round(summary(lm(Rendimiento..millas.galon. ~ Caballos.de.Fuerza,data = DB))$r.squared,2)
+
+
+Grafico1 <- DB %>% ggplot(aes(Caballos.de.Fuerza,Rendimiento..millas.galon.)) +
+  geom_point(color = ifelse(DB$Modelo == Modelo_Subset,"red","black"),
+             size = ifelse(DB$Modelo == Modelo_Subset,3,1)) +
+  geom_smooth(method = lm, se =FALSE, linetype = "dotted", color = "black" ) +
+  theme_linedraw() +
+  theme_light() +
+  ylab("Rendimiento (millas/galon)") +
+  xlab("Caballos de Fuerza") +
+  annotate("text" , label = paste0("R2 = ",R_sq), x = 75 , y = 16 , size = 4) +
+  ggtitle("Relacion Potencia - Rendimiento", subtitle = "El punto rojo indica el modelo buscado") +
+  theme(legend.position = "none") +
+  geom_segment(aes(x=60,
+                   y = DB_Subset$Rendimiento..millas.galon.,
+                   xend = DB_Subset$Caballos.de.Fuerza,
+                   yend = DB_Subset$Rendimiento..millas.galon.),
+               color = "red", linetype = "dotted", size = 1) +
+  geom_segment(aes(x=DB_Subset$Caballos.de.Fuerza,
+                   y = 15,
+                   xend = DB_Subset$Caballos.de.Fuerza,
+                   yend = DB_Subset$Rendimiento..millas.galon.),
+               color = "red", linetype = "dotted", size = 1) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0))
+
+
+R_sq <- round(summary(lm(Rendimiento..millas.galon. ~ Peso,data = DB))$r.squared,2)
+
+Grafico2 <- DB %>% ggplot(aes(Peso,Rendimiento..millas.galon.)) +
+  geom_point(color = ifelse(DB$Modelo == Modelo_Subset,"red","black"),
+             size = ifelse(DB$Modelo == Modelo_Subset,3,1)) +
+  geom_smooth(method = lm, se =FALSE, linetype = "dotted", color = "black" ) +
+  theme_linedraw() +
+  theme_light() +
+  ylab("Rendimiento (millas/galon)") +
+  xlab("Peso (Kg)") +
+  annotate("text" , label = paste0("R2 = ",R_sq), x = 2000 , y = 16 , size = 4) +
+  ggtitle("Relacion Peso - Rendimiento", subtitle = "El punto rojo indica el modelo buscado") +
+  theme(legend.position = "none") +
+  geom_segment(aes(x=1750,
+                   y = DB_Subset$Rendimiento..millas.galon.,
+                   xend = DB_Subset$Peso,
+                   yend = DB_Subset$Rendimiento..millas.galon.),
+               color = "red", linetype = "dotted", size = 1) +
+  geom_segment(aes(x=DB_Subset$Peso,
+                   y = 15,
+                   xend = DB_Subset$Peso,
+                   yend = DB_Subset$Rendimiento..millas.galon.),
+               color = "red", linetype = "dotted", size = 1) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0))
+
+### Mapa interactivo con Leaflet ######
+
+bbox <- getbb("Rosario, Santa Fe")
+
+Polig <- getbb("Municipio de Rosario, Santa Fe", format_out = "sf_polygon")
+
+Mapa <- leaflet(Polig, width = "70%") %>%
+  addTiles() %>% 
+  addMarkers(DB_Subset$Longitud,DB_Subset$Latitud)
+  
+#  saveWidget(Mapa, "temp.html", selfcontained = FALSE)
+
+
+```
+  
+
+### Disclaimer
+
+Este reporte tiene como objetivo dar informacion acerca de la performance reportada por usuarios del automovil modelo `r Modelo_Subset`, la revista no se hace cargo por cualquier informacion erronea o que contradiga datos del fabricante ni por cualquier problema que surga del uso de la misma por parte de los lectores.
+
+
+<br />  
+<br />  
+
+## Modelo Publicado: `r Modelo_Subset`
+<br /> 
+
+**Categoria: `r  Cat`**  
+**Precio: `r  Precio` U$S**  
+**Pais de Origen: `r  Pais.de.Origen`**  
+<br />  
+
+## Datos Tecnicos
+
+<br />  
+Potencia: `r  Potencia` CF
+
+Rendimiento: `r  Rendimiento` millas/galon
+Peso: `r  Peso` Kg
+<br />  
+<br />  
+
+
+#### Figuras 1-a y 1-b
+```{r ,echo=FALSE, message=FALSE,fig.width=8,fig.height=5}
+grid.arrange(Grafico1,Grafico2, nrow = 1)
+```
+*Figura 1-a: Rendimiento en función de la potencia, el punto rojo indica donde se encuentra el modelo de auto buscado. Figura 1-b: Rendimiento en función del peso del automovil, nuevamente el punto rojo indica el modelo de auto buscado.*
+<br />  
+Si se desea mayor detalle técnico recurrir a este  [link](https://www.carkeys.co.uk/guides/different-car-power-outputs-ex)
+<br />  
+
+## Medidas y Datos Comerciales
+<br />  
+
+
+```{r,echo=FALSE}
+Tabla_Dimensiones%>%
+  kable() %>%
+  kable_styling()%>%
+  column_spec(1:ncol(Tabla_Dimensiones), bold = T) %>%
+  row_spec(Row, bold = T, color = "red")
+```
+
+<br />  
+
+<br />  
+ 
+
+## Donde Conseguirlo
+```{r echo=FALSE}
+
+#  webshot("temp.html", file = "Rplot.png",
+#       cliprect = "viewport")
+Mapa
+```
+
+
+
