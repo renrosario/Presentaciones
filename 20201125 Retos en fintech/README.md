@@ -1,4 +1,4 @@
-# Retos en fintech con R + H2)
+# Retos en fintech con R + H2O
 
 Taller a cargo de la Licenciada Camila Burne.
 
