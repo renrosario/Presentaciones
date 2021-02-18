@@ -11,8 +11,11 @@ Taller a cargo del Ing. Guillermo García para el Grupo de Usuaries de R en Rosa
 
 ## ¿Cómo se usa y su paralelismo con el SQL?
 dt[i, j, by]
+
 i:WHERE / ORDER BY
+
 j:SELECT / UPDATE
+
 by: GROUP BY
 
 ## ¿Y qué pasa con dplyr?
