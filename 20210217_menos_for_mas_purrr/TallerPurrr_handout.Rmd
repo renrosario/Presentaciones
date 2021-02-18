@@ -1,0 +1,570 @@
+---
+title: "Menos for, más purrr"
+author: "Nacho Evangelista"
+date: "18 de Febrero de 2021"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = 'markup', comment="")
+```
+
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+options(tibble.print_max = 10)
+```
+
+# Listas
+
+## ¿Cómo se definen?
+
+```{r listas-1, echo=TRUE}
+animalitos <- list(
+  animales = c("perro", "gato", "elefante", "vaca"),
+  acciones = c("ladrar", "maullar", "barritar", "mugir"),
+  nombres = list("Dalmata" = "Pongo", "Marley"),
+  5)
+```
+
+```{r listas-2, echo=TRUE}
+str(animalitos)
+```
+
+```{r listas-3, echo=TRUE}
+names(animalitos)
+```
+
+## ¿Cómo se accede a sus elementos?
+
+```{r listas-4, echo=TRUE}
+animalitos[["animales"]]
+```
+
+```{r listas-5, echo=TRUE}
+animalitos$acciones
+```
+
+```{r listas-6, echo=TRUE}
+animalitos$"nombres"
+```
+
+```{r listas-7, echo=TRUE}
+animalitos[[1]]
+```
+
+```{r listas-8, echo=TRUE}
+animalitos[[4]]
+```
+
+# Purrr
+
+## Operaciones vectorizadas
+
+Muchas operaciones de \texttt{R} funcionan en forma vectorizada; aplicadas a vectores, algunas funciones se aplican elemento a elemento (una suerte de iteración)
+```{r op-vectorizada-1, echo=TRUE}
+v <- c(2,5,7)
+exp(v)
+```
+
+Muchas funciones no tienen esa capacidad
+```{r op-vectorizada-2, echo=TRUE,results='hold'}
+meses <- c("Ene","Feb","Mar","Abr","May","Jun",
+           "Jul","Ago","Sep","Oct","Nov","Dic")
+which(meses=="Sep")
+which(meses==c("Sep","Ene"))
+```
+
+## Función map
+
+Apliquemos algunas funciones a nuestra lista de animalitos
+```{r map-1, echo=TRUE}
+map(animalitos,typeof)
+```
+
+```{r map-2, echo=TRUE}
+map(animalitos,length)
+```
+
+También podemos usar \texttt{purrr} con vectores
+```{r map-3, echo = TRUE}
+v <- c(1,3)
+map(v,rnorm)
+```
+
+```{r map-4, echo = TRUE}
+# agregamos parámetros adicionales de la función rnorm
+v <- c(1,5)
+map(v,rnorm,mean=4,sd=2)
+```
+
+### Especificando el tipo de salida
+
+Si la función que aplicamos devuelve un único elemento, podemos usar las variantes map_lgl, map_int, map_dbl o map_chr y obtener un vector como resultado
+```{r map-5, echo=TRUE}
+map_chr(animalitos,typeof)
+```
+
+```{r map-6, echo=TRUE}
+map_int(animalitos,length)
+```
+
+### Funciones propias
+
+Además de usar funciones predefinidas, podemos definir nuestras propias funciones
+```{r map-funciones-1, echo=TRUE}
+sumar_diez <- function(x) return(x+10)
+map_dbl(c(-10,4,7),sumar_diez)
+```
+
+```{r map-funciones-2, echo = TRUE}
+map_dbl(c(-10,4,7),function(x) return(x+10))
+```
+
+```{r map-funciones-3, echo = TRUE}
+# función anónima (el argumento es siempre .x)
+map_dbl(c(-10,4,7), ~.x+10) 
+```
+
+La definición de una función anónima permite ser más explícito en el pasaje de parámetros
+```{r map-funciones-4, echo = TRUE}
+v <- c(1,5)
+map(v,~rnorm(.x,mean=4,sd=2)) # el argumento es siempre .x!
+```
+
+Comparar con
+```{r map-funciones-5, echo = TRUE, eval = FALSE}
+v <- c(1,5)
+map(v,rnorm,mean=4,sd=2)
+```
+
+También podemos hacer
+```{r map-funciones-6, echo = TRUE}
+v <- c(1,8)
+map(v,~rnorm(n=2,mean=.x,sd=1)) # el argumento es siempre .x!
+```
+
+## Dos argumentos
+
+Queremos extraer las primeras \texttt{n} letras de algunas palabras, donde \texttt{n} es una cantidad variable
+```{r map2-ejemplo-1, echo=TRUE}
+palabras <- c("recorcholis","nacimiento","rosedal","artista","ion")
+cantidad_letras <- c(2,1,3,2,2)
+# los argumentos son .x y .y
+map2_chr(palabras,cantidad_letras,~substr(.x,1,.y)) 
+```
+
+Queremos generar dos secuencias de fechas
+```{r map2-ejemplo-2, echo=TRUE}
+inicio <- as.Date(c("2018-01-03","2019-03-06"))
+fin <- as.Date(c("2018-01-06","2019-03-08"))
+map2(inicio,fin,~seq.Date(.x,.y,by="1 day"))
+```
+
+```{r lista-dataframe-1, echo=TRUE}
+pelis <- tibble(
+cancion = c("Strange Things", "Life is a Highway", "I'm a Believer"),
+autor = c("Randy Newman", "Rascal Flatts", "Smash Mouth"),
+pelicula = c("Toy Story", "Cars", NA)
+)
+```
+
+```{r lista-dataframe-2, echo=TRUE}
+typeof(pelis)
+```
+
+```{r lista-dataframe-3, echo=TRUE}
+as.list(pelis)
+```
+
+```{r lista-dataframe-4, echo=TRUE}
+map_chr(pelis,typeof)
+```
+
+```{r lista-dataframe-5, echo=TRUE}
+map_int(pelis,~sum(is.na(.x)))
+```
+
+# Dataframes anidados
+
+¿Cómo se construyen las columnas lista y los dataframes anidados?
+
+- En la definición del `tibble`
+- Usando `nest` (y `group_by`)
+- Como resultado de una operación.
+
+## I. En la definición del tibble
+
+```{r columnas-lista-1, echo=TRUE}
+T1 <- tibble(
+  v1 = 1:3,
+  v2 = c("a","b","c"),
+  v3 = list(c("A","B","C")),
+  v4 = 10
+)
+```
+
+
+```{r columnas-lista-2, echo=TRUE, eval=FALSE}
+# va a dar error
+T2 <- tibble(
+  v1 = 1:3,
+  v2 = c("a","b","c"),
+  v3 = list(c("A","B","C"),"B")
+)
+```
+
+```{r columnas-lista-3, echo=TRUE}
+T3 <- tibble(
+  v1 = 1:3,
+  v2 = c("a","b","c"),
+  v3 = list(c("A","B","C"),"perro",5)
+)
+```
+
+```{r columnas-lista-4, echo=TRUE}
+T4 <- tibble(
+  v1 = 1:3,
+  v2 = c("a","b","c"),
+  v3 = list(rnorm(1),rnorm(10),rnorm(100))
+)
+```
+
+```{r columnas-lista-5, echo=TRUE}
+animalitos <- list(animales = c("perro","gato","elefante","vaca"),
+               acciones = c("ladrar","maullar","barritar","mugir"),
+               nombres = list(c("Pongo","Marley","Golfo"),
+                              c("Pelusa","Tom"),
+                              c("Tantor","Dumbo"),
+                              c("Oscar")))
+
+as_tibble(animalitos)
+```
+
+## II. Usando nest
+
+```{r}
+options(width = 60)
+head(mtcars)
+```
+
+```{r nested-dataframes-1, echo=TRUE}
+mtcars %>%
+  group_by(gear,carb) %>%
+  nest()
+```
+
+```{r nested-dataframes-2, echo=TRUE}
+mtcars %>%
+  nest(datos = !c(gear,carb))
+```
+
+## III. Como resultado de una operación
+
+Queremos unir estas dos tablas reemplazando los códigos del casting por los personajes.
+```{r ejemplo-separarfilas-1, echo = TRUE}
+peleas <- tibble::tribble(
+ ~pelea, ~horario,                      ~casting,
+      1,  "20:30",        "gsf901,fez195,yfm179",
+      2,  "20:50",               "thf028,yfm179",
+      3,  "19:40", "jfa348,fez195,gky651,wpx281",
+      4,  "21:00",               "thf028,fez195")
+```
+
+```{r ejemplo-separarfilas-2, echo = TRUE}
+luchadores <- tibble::tribble(
+   ~codigo,           ~nombre,
+  "gsf901",  "Vicente Viloni",
+  "thf028",     "Hip Hop Man",
+  "wpx281",         "La Masa",
+  "fez195", "Fulgencio Mejía",
+  "jfa348",        "Mc Floyd",
+  "phb625",     "Mario Morán",
+  "gky651",      "Rulo Verde",
+  "yfm179",    "Steve Murphy")
+```
+
+```{r ejemplo-separarfilas-3, echo = TRUE}
+peleas %>%
+  mutate(casting_split = strsplit(casting, split = ",")) %>%
+  select(-horario,-casting) %>%
+  unnest(casting_split) %>%
+  left_join(luchadores, by = c("casting_split" = "codigo"))
+```
+
+# Ejemplos
+
+## 1. Identificar el mes
+
+Queremos obtener el número de mes a partir de la abreviatura
+
+```{r ejemplo-meses-1, echo = TRUE}
+datos <- tibble::tribble(
+ ~id,~dia,  ~mes, ~año,
+   1,  15, "Sep", 2019,
+   2,   6, "oct", 2021,
+   3,   3, "Ene", 2020,
+   4,  31, "dic", 2019)
+```
+
+Idea
+
+1. Armar un vector con las abreviaturas de los meses
+2. Usar la función \texttt{which} junto con \texttt{map}
+
+```{r ejemplo-meses-2, echo=TRUE}
+meses <- c("Ene","Feb","Mar","Abr","May","Jun",
+           "Jul","Ago","Sep","Oct","Nov","Dic")
+```
+
+```{r ejemplo-meses-3, echo=TRUE}
+which(meses=="Sep")
+```
+
+```{r ejemplo-meses-4, echo=TRUE}
+which(meses==c("Sep","Ene"))
+```
+
+```{r echo = TRUE}
+datos %>%
+  mutate(mes_n = map(mes,~which(meses==.x)))
+```
+
+```{r echo = TRUE}
+datos %>%
+  mutate(mes_n = map(mes,~which(toupper(meses)==toupper(.x))))
+```
+
+```{r echo = TRUE}
+datos %>%
+  mutate(mes_n = map_int(mes,~which(toupper(meses)==toupper(.x))))
+```
+
+## 2. Secuencia de fechas
+
+Contamos con los movimientos de dos empresas. Interesa tener la serie temporal de eventos para cada empresa y producto. 
+```{r ejemplo-fechas-1, echo = TRUE}
+datos <- tibble::tribble(
+  ~empresa, ~producto,       ~fecha, ~evento,
+       "A",      "A1", "02/06/2018",     112,
+       "A",      "A1", "06/06/2018",     141,
+       "A",      "A1", "13/07/2018",     119,
+       "A",      "A2", "01/05/2018",      53,
+       "A",      "A2", "04/05/2018",      67,
+       "B",      "B1", "01/07/2018",     127,
+       "B",      "B1", "05/07/2018",     301,
+       "B",      "B1", "10/07/2018",      98,
+       "B",      "B1", "11/07/2018",     167)
+datos$fecha <- as.Date(datos$fecha,format = "%d/%m/%Y")
+```
+
+
+Idea:
+
+1. Determinar la primera y última fecha de cada grupo
+2. Generar una secuencia de fechas (`seq.Date`) para cada grupo y construir una tabla con todas las fechas
+3. Unir esta tabla con la original
+
+```{r ejemplo-fechas-2, echo = TRUE}
+fechas_todas <- 
+  datos %>%
+  group_by(empresa, producto) %>%
+  summarise(fecha_inicial = min(fecha),
+            fecha_final = max(fecha)) %>%
+  mutate(fechas = map2(fecha_inicial,
+                       fecha_final,
+                       ~seq.Date(.x,.y,by="1 day"))) %>%
+  select(-fecha_inicial,-fecha_final)
+```
+
+```{r ejemplo-fechas-3, echo = TRUE}
+fechas_todas %>%
+  unnest(fechas) %>%
+  left_join(datos, by = c("empresa","producto","fechas" = "fecha"))
+```
+
+## 3. Abrir varios archivos a la vez
+
+En el directorio de trabajo hay varios archivos que debemos abrir y leer.
+
+```{r ejemplo-abrirarchivos-1, echo = TRUE, eval = FALSE}
+# hay que tener algun archivo csv en el directorio de trabajo
+list.files(pattern="archivo")
+```
+
+Idea:
+
+1. Listar los archivos y construir un `tibble`
+2. Leer cada archivo con `read.csv`
+3. _Desanidar_
+
+```{r ejemplo-abrirarchivos-2, echo = TRUE, eval=FALSE}
+# hay que tener algun archivo csv en el directorio de trabajo
+list.files(pattern="archivo") %>%
+  tibble(archivos = .) %>%
+  mutate(contenido = map(archivos,read.csv)) %>%
+  unnest(contenido)
+```
+
+## 4. Múltiples salidas
+
+Queremos analizar frases de canciones y determinar: a) cantidad de palabras, b) cantidad de preposiciones
+ 
+```{r ejemplo-multiplessalidas-1, echo = FALSE}
+datos <- tibble::tribble(
+               ~banda,                     ~cancion,                                                           ~frase,
+    "Los Wachiturros",          "Este es el pasito",                               "El que no hace palmas es un gato",
+            "La Base",             "Sabor sabrosón",      "Según la moraleja, el que no hace palmas se deja, se deja",
+       "Damas Gratis",           "Me va a extrañar",                          "ATR perro cumbia cajeteala piola gato",
+    "Altos Cumbieros",            "No voy a llorar",       "Andy, fijate que volvieron, quienes… los altos cumbieros",
+  "Los Pibes Chorros", "Llegamos los Pibes Chorros", "Llegamos los pibes chorros queremos las manos de todos arriba…",
+            "La Liga",               "Se re pudrió",                       "El que no hace palmas tiene fama de gato",
+       "Los Palmeras",                    "La cola",    "A la una, a la dos, a la one two three four five seven nine")
+```
+
+```{r ejemplo-multiplessalidas-1-NO}
+options(width = 60)
+datos
+```
+
+Idea:
+
+1. Definir una función que devuelva ambas cantidades
+2. Aplicarla a cada frase
+
+```{r ejemplo-multiplessalidas-3, echo=TRUE}
+analizar_frase <- function(cancion){
+  preposiciones <- c("a", "ante", "bajo", "cabe", "con", 
+                     "contra", "de", "desde", "durante", 
+                     "en", "entre", "hacia", "hasta", "mediante", 
+                     "para", "por", "según", "sin", "so", "sobre", 
+                     "tras", "versus", "vía")
+  
+  palabras <- strsplit(cancion," ") %>% unlist
+  
+  cant_palabras <- length(palabras)
+  
+  cant_preposiciones <- sum(palabras %in% preposiciones)
+  
+  return(list(cant_palabras = cant_palabras,
+              cant_preposiciones = cant_preposiciones))
+  }
+```
+
+```{r ejemplo-multiplessalidas-4, echo = TRUE}
+datos %>%
+  mutate(resultado = map(frase,analizar_frase)) %>%
+  unnest_wider(resultado)
+```
+
+## 5. Múltiples plots {.fragile}
+
+Queremos construir un conjunto de plots mostrando los ajustes de polinomios de distinto orden a los puntos del dataset.
+
+```{r ejemplo-multiplesplots-1, echo = TRUE}
+datos <- tibble::tribble(
+ ~`x`,  ~`y`,
+  211,   184,
+  230,   147,
+  587,   413,
+  414,   252,
+  419,   252,
+  157,   272,
+  327,   158,
+  222,   158,
+  451,   249,
+  296,   127)
+```
+
+Idea:
+
+1. Combinamos los datos con cada uno de los posibles órdenes del polinomio
+2. `group by` + `nest`
+3. Aplicar una función que cree el gráfico utilizando `map`
+
+```{r ejemplo-multiplesplots-2, echo=TRUE}
+plots <- crossing(orden = 1:6, datos) %>%
+  nest(datos = !orden) %>%
+  ungroup() %>%
+  mutate(plot = map2(datos, orden,
+                     function(.x, .y) {
+                       p<-ggplot(.x, aes(x = x, y = y)) +
+                         geom_point() +
+                         stat_smooth(
+                           method = "lm", se = FALSE,
+                           formula = y ~ poly(x, degree = .y),
+                           colour = "maroon1") + 
+                         theme_minimal()
+                       return(p)
+                     }))
+```
+
+```{r ejemplo-multiplesplots-4, echo=TRUE, fig.height=4, warning=FALSE, message=FALSE}
+plots$plot[[6]]
+```
+
+## 6. K-fold cross validation
+
+```{r ejemplo-cv-1, echo=TRUE}
+K <- 3
+data <- mtcars %>% 
+  mutate(fold = rep(1:K,length.out=nrow(.))) %>% 
+  arrange(fold) %>%
+  group_by(fold) %>%
+  nest() %>%
+  mutate(dummy = 1)
+```
+
+```{r ejemplo-cv-2, echo=TRUE}
+train_test <- data %>% 
+  inner_join(data, by="dummy") %>%
+  select(-dummy) %>%
+  filter(fold.y != fold.x) %>%
+  group_by(fold.x) %>%
+  summarise(test = list(first(data.x)),
+            train = list(bind_rows(data.y)))
+```
+
+```{r ejemplo-cv-3, echo=TRUE}
+train_test %>%
+  mutate(modelo = map(train,~lm(mpg ~ wt,data=.x)),
+         pred = map2(modelo,test,~predict(.x,.y)),
+         real = map(test,"mpg"))
+```
+
+
+# Extra
+
+## Más de dos argumentos: pmap
+
+```{r pmap-1, echo=TRUE}
+bolilleros <- list(1:6,1:50,1:100)
+cant <- list(6,5,4)
+con_reemplazo <- list(TRUE,FALSE,FALSE)
+
+pmap(list(bolilleros,cant,con_reemplazo),
+     ~sample(x = ..1, size = ..2, replace = ..3))
+```
+
+## Manejo de errores
+
+```{r possibly-1, echo=TRUE, eval=FALSE}
+c(list.files(pattern="archivo"),"archivo_4.csv") %>%
+  tibble(archivos = .) %>%
+  mutate(contenido = map(archivos,read.csv)) %>%
+  unnest(contenido)
+```
+
+```{r possibly-2, echo=TRUE, warning=FALSE}
+possibly_read.csv <- possibly(read.csv,otherwise = data.frame())
+
+c(list.files(pattern="archivo"),"archivo_4.csv") %>%
+  tibble(archivos = .) %>%
+  mutate(contenido = map(archivos,possibly_read.csv))
+```
+
