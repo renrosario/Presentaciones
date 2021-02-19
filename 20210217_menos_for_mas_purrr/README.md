@@ -1,3 +1,10 @@
+# Menos for, más purrr
+
+Taller a cargo del Ing. Ignacio Evangelista para el Grupo de Usuaries de R en Rosario.
+
+18 de febrero de 2021, Rosario, Argentina.
+
+
 Listas
 ======
 
