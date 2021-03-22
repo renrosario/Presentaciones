@@ -1,0 +1,276 @@
+---
+title: "Radios Censales y otras yerbas"
+author: "Lautaro Cantar"
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+# 1. Arranquemos
+
+Lo primero que vamos a hacer es bajar o cargar los paquetes en cuestión. Vamos a usar a los viejos y conocidos `tidyverse` y `ggplot2` y nuestras vedettes `sf` y `leaflet`.
+
+```{r, warning=FALSE, message=FALSE}
+# Instalamos los paquetes si no están instalados en nuestras computadoras
+# install.packages("tidyverse")
+# install.packages("ggplot2")
+# install.packages("sf")
+# install.packages(leaflet)
+
+# Carga de los paquetes a utilizar
+library(tidyverse)
+library(ggplot2)
+library(sf)
+library(leaflet)
+```
+
+Ahora si, a bajar los datos que nos reunen a todos hoy acá. Pueden entrar a este [link](https://www.indec.gob.ar/indec/web/Institucional-Indec-Codgeo) y descargar los datos de la Provincia de Santa Fe. Van a bajar un `.zip`, lo extraen y ya pueden trabajar con el... o bajan los datos del Github donde los subí a la carpeta `datos`:
+
+```{r}
+# Abriendo el shp
+radios_santa_fe <- st_read("datos/Codgeo_Santa_Fe_con_datos/Santa_Fe_con_datos.shp") 
+```
+
+Acá tenemos dos opciones: o mapeamos primero y exploramos los datos primero o al revés. Vamos por la segunda opción porque algo ya vimos cuando abrimos los datos hace un ratito:
+
+¿Qué tienen estos datos para mostrarnos?
+
+```{r}
+# Exploración inicial de datos
+summary(radios_santa_fe)
+```
+
+Aquí vemos que el archivo `radios_santa_fe` tiene las siguientes variables:
+
+* `toponimo_i`: Identificación única propia del archivo
+* `link`: ID del Radio Censal 
+* `varon`: cantidad de varones en dicho radio censal
+* `mujer`: cantidad de mujeres en dicho radio censal
+* `totalpobl`: población total 
+* `hogares`: cantidad total de hogares
+* `viviendasp`: total de viviendas particulares
+* `viv_part_h`:  total de viviendas particulares habitadas
+* `geometry`: información geográfica que utiliza R para hacer la visualización del mapa.
+
+El siguiente paso será visualizar los radios censales de la Provincia de Santa Fe. Para dicha tarea hay una gran variedad de paquetes en R que responden a distintas necesidades. Se puede usar el paquete `ggplot2` para las visualizaciones estáticas o el paquete `leaflet` para las visualizaciones dinámicas. Hay muchas opciones más, estas son mis preferidas personales. 
+
+# 2. _Mapiemos_ (?)
+
+Vayamos primero con `ggplot2`:
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot() + 
+  geom_sf(data = radios_santa_fe) +
+  labs(title = "Radios Censales de la Provincia de Santa Fe",
+         subtitle = "Fuente: INDEC")
+```
+
+Ahora a `leaflet`:
+
+```{r}
+# Le cambiamos la CRS para que leaflet lo pueda leer sin problemas
+radios_santa_fe <- st_transform(radios_santa_fe, crs = 4326)
+
+# A mapear!
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = radios_santa_fe)
+```
+
+También podemos empezar a tunear nuestros mapas interativos: le cambiamos el color y le agregamos un pop-up
+
+```{r}
+leaflet() %>%
+     addTiles() %>%
+     addProviderTiles("CartoDB.Positron") %>%
+     # Mapeando los poligonos de Santa Fe
+     addPolygons(data = radios_santa_fe,
+                 color = "grey", 
+                 weight = 1,
+                 smoothFactor = 0.5,
+                 opacity = 1.0, 
+                 popup = ~link)
+
+```
+
+Y ahora coloreamos en base a la población:
+
+```{r}
+
+radios_santa_fe <- radios_santa_fe %>%
+  filter(totalpobl > 1 & totalpobl < 4500)
+
+pal <- colorNumeric(
+  palette = "Blues",
+  domain = radios_santa_fe$totalpobl)
+
+
+leaflet() %>%
+  addTiles() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  # Mapeando los polígonos de Rosario
+  addPolygons(data = radios_santa_fe,
+              color = ~pal(totalpobl), 
+              weight = 2,
+              smoothFactor = 0.5,
+              opacity = 1.0, 
+              popup = ~paste("ID:", link, "<br>",
+                             "Total Población:", totalpobl))
+
+```
+
+# 3. Creemos información!
+
+## 3.1 Con puntos
+
+Una de las cosas que podemos hacer para enriquecer los datos de radios censales o construir información en base a los radios censales es, por ejemplo, utilizar información geográfica de distintas fuentes y en distintos formatos, según las preguntas que querramos contestar. Por ejemplo, una pregunta que podemos hacernos es:
+
+_*¿Es la distribución de contenedores de basura equitativa para cada uno de los habitantes de Rosario*_
+
+Para eso vamos a trabajar con información del sitio de [Datos Abiertos de la Municipalidad de Rosario](https://datos.rosario.gob.ar/), más específicamente con datos de [Contenedores de residuos domiciliarios](https://datos.rosario.gob.ar/dataset/contenedores-de-residuos-domiciliarios). Vamos a bajar los datos directamente a nuestro dataset que llamaremos (muy originalmente) `contenedores`.
+
+```{r}
+contenedores <- read.csv("https://datos.rosario.gob.ar/sites/default/files/contenedores_de_residuos_domiciliarios_json3_1.csv")
+
+summary(contenedores)
+```
+
+Cuando empezamos a jugar con los datos, vemos que tiene una columna que se llama `GEOJSON` pero que no es JSON y está muy complicado sacar las coordenadas. Pero con un poco de magia, vamos a hacer lo posible para extraer todo lo que necesitamos.
+
+```{r}
+contenedores <- contenedores %>% 
+  mutate(GEOJSON = str_remove_all(GEOJSON, "[\", {, }, \\[, \\],:]" ),
+         GEOJSON = str_remove_all(GEOJSON, "typeFeaturepropertiesgeometrytypePointcoordinates" )) %>%
+  separate(GEOJSON, sep = "-", c(NA, "long", "lat")) %>% 
+  mutate(lat = - as.numeric(lat),
+         long = - as.numeric(long),
+         direccion_completa = paste(calle, altura))
+
+
+```
+
+Y ahora, veamos como quedan esos puntos de los `r nrow(contenedores)` contenedores en la Ciudad de Rosario! Para eso vamos a usar la función 
+
+```{r}
+
+leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(data = contenedores, 
+                   lat = ~lat, 
+                   lng = ~long, 
+                   radius = 1,
+                   popup = ~direccion_completa)
+
+
+```
+
+Ahora, nos podemos preguntar: ¿cuántos contenedores hay por radio censal? Una forma de saber eso, es hacer una _intersección_ entre dos archívos geográficos. Para eso vamos a tener que convertir el dataset `contenedores` en un dataset geográfico. 
+
+```{r}
+contenedores_shp <- contenedores %>% 
+  filter(!is.na(lat) & !is.na(long)) %>% 
+  st_as_sf(coords = c("long", "lat"), 
+           crs = 4326)
+
+class(contenedores_shp)
+```
+
+También vamos a aprovechar y nos quedamos solo con los radios censales de Rosario, que empiezan con el número _"82084"_.
+
+```{r}
+radios_rosario <- radios_santa_fe %>% 
+  filter(str_detect(link, "82084"))
+```
+
+Antes de hacer la intersección, debemos considerar que ambos archivos deben tener la misma proyección:
+
+```{r}
+# Controlando que tengan la misma proyeccion
+st_crs(radios_rosario)
+st_crs(contenedores_shp)
+```
+
+Dado que ambos archivos geográficos tienen la misma proyección, hagamos la intersección! Para eso vamos a utiizar la función `st_intersection` del paquete `sf`. Una aclaración: los dos archivos tienen que ser archivos geográficos. Nuestra intersección se va a llamar `interseccion_contenedores`.
+
+```{r, warning=FALSE, message=FALSE}
+# Creando la interseccion
+interseccion_contenedores <- st_intersection(radios_rosario, contenedores_shp)
+
+interseccion_contenedores <- interseccion_contenedores %>% 
+  group_by(link) %>% 
+  tally() %>% 
+  as.data.frame()
+```
+
+Hagamos ahora la unión con el archivo `radios_rosario`.
+
+```{r, message=FALSE, warning=FALSE}
+radios_rosario <- radios_rosario %>% 
+  left_join(interseccion_contenedores %>% 
+              select(link, n))
+
+radios_rosario <- radios_rosario %>%
+  mutate(n = as.numeric(n)) %>% 
+  mutate(n = case_when(is.na(n) ~ 0,
+                       TRUE ~ n))
+
+# Definimos la paleta de colores
+pal <- colorNumeric(
+  palette = "Blues",
+  domain = radios_rosario$n)
+
+# Hacemos el mapa
+leaflet() %>%
+  addTiles() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  # Mapeando los polígonos de Rosario
+  addPolygons(data = radios_rosario,
+              color = ~pal(n), 
+              weight = 1, 
+              smoothFactor = 1,
+              stroke = 0.1, 
+              fillOpacity = 0.75,
+              popup = ~as.character(n)) 
+
+```
+
+Por último, veamos cuántos contenedores hay por persona en cada radio censal!
+
+```{r}
+radios_rosario <- radios_rosario %>% 
+  mutate(personas_por_contenedor = totalpobl / n )
+
+summary(radios_rosario$personas_por_contenedor)
+```
+
+Y ahora lo vemos en un nuevo mapa!
+
+```{r}
+radios_rosario <- radios_rosario %>% 
+  filter(personas_por_contenedor < 3000)
+
+# Definimos la paleta de colores
+pal_contenedores <- colorNumeric(
+  palette = "Reds",
+  domain = radios_rosario$personas_por_contenedor)
+
+# Hacemos el mapa
+leaflet() %>%
+  addTiles() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  # Mapeando los polígonos de Rosario
+  addPolygons(data = radios_rosario,
+              color = ~pal_contenedores(personas_por_contenedor), 
+              weight = 1, 
+              smoothFactor = 1,
+              stroke = 0.1, 
+              fillOpacity = 0.75,
+              popup = ~as.character(personas_por_contenedor)) 
+```
+
