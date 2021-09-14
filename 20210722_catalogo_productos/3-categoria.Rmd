@@ -1,0 +1,101 @@
+```{r {{FAM}}-{{j}}-setup}
+# CAT contiene el Codigo de la CATEGORIA del loop
+# Sera usado para indicar nombres de archivos y en filtros
+# Uso tryCatch porque el comportamiento de {{j}} depende
+# si j es caracter o numerico
+# Si as_name(quote({{j}})) falla, quiere decir que {{j}}
+# era numerico. Me aseguro de rellenar leading ceros con str_pad()
+
+CAT <- tryCatch(
+  # Si {{j}} es caracter
+  as_name(quote({{j}})),
+  # Si {{j}} es numerico, el codigo de arriba tirara error
+  # Si ese es el caso, asigno el siguiente codigo
+  error = function(e) {
+    return(str_pad(string = {{j}},
+                   width = 3,
+                   side = "left",
+                   pad =  "0"))
+        }
+  )
+
+# En este caso puedo usar la variable FAM sin las llaves
+
+# Dentro de la carpeta img puedo guardar imagenes para cada 
+# CATEGORIA dentro de una FAMILIA.
+# La estructura es img/Codigo FAMILIA/Codigo CATEGORIA.jpg
+# La imagen, si existe, sera colocada debajo de la tabla
+
+# FILEPATH a la imagen
+img <- file.path("img", FAM, paste0(CAT, ".jpg"))
+
+# print(img)
+
+# exists_image sera TRUE si la imagen existe y FALSE si no.
+# Este indicador sera usado con la opcion eval del code chunk
+exists_image <- tryCatch(
+  file.exists(img),
+  error = function(e) {
+    return(FALSE)
+    }
+  )
+
+# Texto del caption de la Tabla
+caption_text <- 
+  categorias_familia_i %>% 
+  filter(CATEGORIA == CAT) %>% 
+  select(NOMBRE) %>% 
+  as.character()
+```
+
+```{r {{FAM}}-{{j}}-tabla}
+# Me quedo con los productos de la categoria j
+precios_prod_cat_j <- precios_prod_fam_i %>% 
+  filter(CATEGORIA == CAT) %>% 
+  select(CODIGO, DESCRIPCION, PRECIO)
+
+# Hago diferencia en el estilo de la tabla de acuerdo al numero de filas.
+# Si no hago esto, cuando tengo una tabla con menos de 2 filas,
+# latex_options = c("striped") da error.
+
+if (nrow(precios_prod_cat_j) > 1) {
+  precios_prod_cat_j  %>%
+    kable(
+      align = c("l", "l", "r"),
+      longtable = TRUE, 
+      col.names = NULL,
+      caption = caption_text
+      ) %>% 
+    kable_styling(
+      latex_options = c(
+        "striped" #,
+        # "repeat_header"
+        ),
+      # repeat_header_text = "\\textit{(Continuación)}",
+      position = "center") %>%
+    column_spec(c(1,3), bold = T, include_thead = T)
+} else {
+ precios_prod_cat_j  %>%
+    kable(
+      align = c("l", "l", "r"),
+      longtable = TRUE, 
+      col.names = NULL,
+      caption = caption_text
+      ) %>% 
+    kable_styling(
+      # latex_options = c(
+      #   "striped",
+      #   "repeat_header"
+      #   ),
+      # repeat_header_text = "\\textit{(Continuación)}",
+      position = "center") %>%
+    column_spec(c(1,3), bold = T, include_thead = T)
+}
+
+```
+
+<!-- Este code chunk sera evaluado si existe una imagen para la CATEGORIA -->
+
+```{r {{FAM}}{{j}}-imagen, eval=exists_image, fig.align='center'}
+knitr::include_graphics(img)
+```

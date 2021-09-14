@@ -1,0 +1,178 @@
+---
+output: pdf_document
+geometry: "left=1cm,right=1cm,top=3cm,headheight=1cm,bottom=2cm"
+header-includes:
+   \usepackage{caption}
+   \usepackage{xcolor}
+   \usepackage[most]{tcolorbox}
+   \usepackage{graphicx}
+   \usepackage{fancyhdr}
+   \pagestyle{fancy}
+   \usepackage[T1]{fontenc}
+   \usepackage{tgbonum}
+   \usepackage{hyperref}
+   \hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+   }
+---
+
+<!-- tinytex::install_tinytex() -->
+
+<!-- Remover linea separadora del header -->
+
+\renewcommand{\headrulewidth}{0pt}
+
+<!-- Cambiar nombre de la Table of Contents -->
+
+\renewcommand\contentsname{\huge{Índice}}
+
+<!-- Eliminar formato de la Table of Contents -->
+<!-- Lo que buscaba era sacar el numero de pagina -->
+
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+
+<!-- Titulos de las tablas modificando el caption -->
+
+\captionsetup[table]{
+   labelformat=empty,
+   font={Large, bf, color=white},
+   box=colorbox,
+   boxcolor=black
+}
+
+<!-- Opciones de tcolorbox, usado para separar las Familias -->
+
+\tcbset{
+    frame code={}
+    center title,
+    left=0pt,
+    right=0pt,
+    top=0pt,
+    bottom=0pt,
+    colback=black,
+    colframe=white,
+    width=\dimexpr\textwidth\relax,
+    enlarge left by=0mm,
+    boxsep=5pt,
+    arc=0pt,outer arc=0pt,
+}
+
+<!-- Caratula -->
+
+\begin{titlepage}
+   \begin{center}
+   \includegraphics[height=3cm]{img/logo.jpg} \\
+   \Huge{\textbf{Catálogo Supermercado}} \\
+   \LARGE{Noviembre 2020} \\
+   \vspace{1cm}
+   \includegraphics{img/caratula.jpg}
+   Supermercado S.R.L\\
+   Calle ABC 1214 - Rosario - Santa Fe\\
+   email@gmail.com\\
+   000 000-0000 / 000 000-0000\\
+   \url{www.paginadeinternet.com.ar}
+   \end{center}
+\end{titlepage}
+
+<!-- Insertar Indice (con salto de pagina cuando termina) -->
+\tableofcontents\label{toc}
+\newpage
+
+<!-- Elimino valores por defecto del encabezado y pie de pagina -->
+<!-- Los mismos seran modificados en el futuro -->
+\fancyhead[]{}
+\fancyfoot[]{}
+
+<!-- Inicio conteo de numero de pagina -->
+\setcounter{page}{1}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r cargar-librerias}
+library(knitr)
+library(readxl)
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(kableExtra)
+library(gridExtra)
+library(rlang)
+```
+
+```{r leer-datos}
+# Los productos se dividen en FAMILIAS
+# y cada FAMILIA esta dividida en CATEGORIAS
+
+# El archivo nombres_familias.xlsx contiene:
+# Codigo de la FAMILIA
+# Nombre de la FAMILIA
+# Este archivo se usara en el nombre de las secciones (usadas para el Indice)
+
+nombres_familias <- 
+   read_xlsx(
+      "data/nombres_familias.xlsx",
+      col_types = c("text", "text")
+   )
+
+# El archivo nombres_categorias.xlsx contiene:
+# Codigo de la FAMILIA
+# Codigo de la CATEGORIA
+# Nombre de la CATEGORIA
+# Este archivo se usara en el caption de las tablas
+
+nombres_categorias <- 
+   # Leer el archivo
+   read_xlsx(
+      "data/nombres_categorias.xlsx",
+      col_types = c("text", "text", "text")
+      )
+
+# El archivo precios_productos.xlsx contiene:
+# Codigo del PRODUCTO 
+# (Compuesto por: Codigos de FAMILIA, CATEGORIA y PRODUCTO)
+# DESCRIPCION: Nombre del PRODUCTO
+# PRECIO: Precio del Producto
+# Este archivo se usara para crear las tablas
+# OPCIONAL: Crear una columna que indique si el producto debe
+# ser listado en el catalago que tome valores 1 y 0 (presente-ausente)
+
+precios_productos <- read_xlsx("data/precios_productos.xlsx") %>% 
+   # Aplico filtros a los datos.
+   # En este caso particular, a veces se dejan placeholders
+   # con celdas vacias para agregar mas productos en el futuro.
+   filter(!is.na(CODIGO)) %>% 
+   # Por como esta diseñado el codigo de producto, puedo extraer
+   # todos los codigos en distintas columnas usando separate
+   separate(
+      col = CODIGO, 
+      into = c("FAMILIA", "CATEGORIA", "PRODUCTO"),
+      sep = " ",
+      remove = FALSE
+    ) %>% 
+   # Redondeo la columna precio, y le agrego el signo $
+   mutate(
+      PRECIO = str_c("$", sprintf("%.2f", round(PRECIO,2)))
+      ) %>% 
+   # Agrego el nombre de las familias
+   left_join(nombres_familias) %>% 
+   # Agrego el nombre de las categorias
+   left_join(nombres_categorias)
+```
+
+```{r loop-familias}
+# Listado de FAMILIAS
+lista_familias <- as.character(unique(precios_productos$FAMILIA))
+
+out = NULL
+for (i in lista_familias){
+  out = c(out, knit_expand('2-familia.rmd'))
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`

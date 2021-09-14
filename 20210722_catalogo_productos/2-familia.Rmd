@@ -1,0 +1,74 @@
+<!-- Codigo para poner una imagen en el encabezado que depende de la FAMILIA -->
+<!-- {{i}} indica el nombre de la familia en cada iteracion del loop/bucle -->
+<!-- Las imagenes se deben guardar, en este caso, dentro de img/1-head -->
+
+\fancyhead[C]{\includegraphics[height=1cm]{img/1-head/{{i}}.jpg}}
+
+<!-- Codigo para poner una imagen en el pie de pagina que depende de la FAMILIA -->
+<!-- {{i}} indica el nombre de la familia en cada iteracion del loop/bucle -->
+<!-- En este caso la imagen se pone en el lado izquierdo,  -->
+<!-- para poner en el derecho el numero de pagina -->
+
+<!-- \lfoot{\includegraphics{img/1-foot/{{i}}.jpg}} -->
+\lfoot{\includegraphics[height=1cm]{img/logo.jpg}}
+
+<!-- Link al Indice en el centro del pie de pagina -->
+\cfoot{\hyperref[toc]{Volver al Indice}}
+
+<!-- Numero de pagina a la derecha -->
+\rfoot{\thepage}
+
+<!-- En el nombre del siguiente code chunk uso {{i}} porque  -->
+<!-- si no me tira error de duplicate chunk name -->
+
+```{r nombre-familia-{{i}}}
+# Caracter con el nombre de la familia de la iteracion i
+# Usado en nombres de secciones
+# Se espera que los Codigos de FAMILIA sean caracter
+# Caso contrario, as_name(quote()) arrojara error
+NOMBRE_FAMILIA <- 
+  nombres_familias %>% 
+  filter(FAMILIA == as_name(quote({{i}}))) %>% 
+  select(NOMBRE_FAMILIA) %>% 
+  as.character()
+```
+
+
+<!-- Codigo usado para separar FAMILIAS -->
+\begin{tcolorbox}
+  \section[`r NOMBRE_FAMILIA`]{\textsc{\LARGE{\textbf{\textcolor{yellow}{ `r NOMBRE_FAMILIA` }  }}}}
+\end{tcolorbox}
+
+<!-- En el nombre del siguiente code chunk uso {{i}} porque  -->
+<!-- si no me tira error de duplicate chunk name -->
+
+```{r filtro-datos-{{i}}}
+# Me quedo con las categorias de la FAMILIA i
+# Como {{i}} lo toma como una "variable", uso as_name(quote({{i}}))
+# Eso no es necesario si {{i}} fuese numerico
+categorias_familia_i <- nombres_categorias %>% 
+  filter(FAMILIA == as_name(quote({{i}})))
+
+# Me quedo con los productos de la familia i
+precios_prod_fam_i <- precios_productos %>% 
+  filter(FAMILIA == as_name(quote({{i}})))
+```
+
+```{r loop-familia-{{i}}}
+# Categorias dentro de la FAMILIA i
+lista_categorias_fam_i <- as.character(unique(precios_prod_fam_i$CATEGORIA))
+
+out = NULL
+for (j in lista_categorias_fam_i) {
+  # FAM es una variable que contiene el nombre de la FAMILIA del loop
+  # Sera usada para nombrar univocamente los code chunk de 3-categoria.rmd
+  FAM <- as_name(quote({{i}}))
+  out = c(out, knit_expand('3-categoria.rmd'))
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+<!-- Cada FAMILIA empieza en una pagina nueva -->
+
+\newpage
